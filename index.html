@@ -26,28 +26,36 @@
         //seteo background del juego
         game.stage.backgroundColor =  '#000';
 
+        var groundSprite = game.add.bitmapData(800, 1);
+         
+        groundSprite.ctx.beginPath();
+        groundSprite.ctx.rect(0, 0, 800, 1);
+        groundSprite.ctx.fillStyle = '#ffffff';
+        groundSprite.ctx.fill();
+
         platforms = game.add.group();
 
         //  We will enable physics for any object that is created in this group
         platforms.enableBody = true;
 
         // Here we create the ground.
-        var ground = platforms.create(0, game.world.height, 'ground');
-        var ground = platforms.create(0, game.world.height, 'ground');
+        var ground = platforms.create(0, game.world.height-1, groundSprite);
+        var top = platforms.create(0,  game.world.height-600, groundSprite);
+
+        ground.body.immovable = true;
+        top.body.immovable = true;
 
         // todo sobre la bola
         // Create BitmapData
-        ball = game.add.bitmapData(800,600);
+        ball = game.add.bitmapData(10,10);
 
         // Dibujo la bola
-        ball.ctx.fillStyle = '#999999';
         ball.ctx.beginPath();
-        ball.ctx.arc(300, 200, 20, 0, Math.PI*2, true); 
-        ball.ctx.closePath();
+        ball.ctx.rect(0, 0, 10, 10);
+        ball.ctx.fillStyle = '#ffffff';
         ball.ctx.fill();
-
-        // Put BitmapData in a Sprite
-        ball = game.add.sprite(0, 0, ball);
+        ball = game.add.sprite(395, game.world.centerY, ball);
+        ball.anchor.setTo(0.5, 0.5);
 
         // Tweening just for fun :)
         //game.add.tween(sprite).to( {  y: 100}, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
@@ -74,10 +82,11 @@
         /*player1.body.bounce.y = 0;
         player1.body.gravity.y = 0;*/
         player1.body.collideWorldBounds = true;
+        player1.body.immovable = true;
 
         ball.body.bounce.y = 1;
         ball.body.bounce.x = 1;
-        ball.body.collideWorldBounds = true;
+        //ball.body.collideWorldBounds = true;
 
         //todo player dos
         player2 = game.add.bitmapData(width, height);
@@ -89,8 +98,8 @@
         drawnObject2 = game.add.sprite(790, game.world.centerY, player2);
         drawnObject2.anchor.setTo(0.5, 0.5);
 
-        ball.body.velocity.x = 500;
-        ball.body.velocity.y = 500;
+        ball.body.velocity.x = -150;
+        ball.body.velocity.y = 150;
 
 
         }
@@ -98,21 +107,24 @@
         function update() {
 
             //  Collide the player and the stars with the platforms
-            game.physics.arcade.collide(player1, ball);
+            game.physics.arcade.collide(player1, ball, function(player1, ball) {
+                ball.body.velocity.y += player1.body.velocity.y;
+            });
             game.physics.arcade.collide(ball, player1);
+            game.physics.arcade.collide(ball, platforms);
 
             player1.body.velocity.y = 0;
 
             if (cursors.up.isDown)
             {
                 //  Move to the left
-                player1.body.velocity.y = -1000;
+                player1.body.velocity.y = -500;
 
             }
             else if (cursors.down.isDown)
             {
                 //  Move to the right
-                player1.body.velocity.y = 1000;
+                player1.body.velocity.y = 500;
 
             }
             else
