@@ -5,6 +5,10 @@
         <title>hello phaser!</title>
         <script src="phaser.js"></script>
     </head>
+    <script src="/socket.io/socket.io.js"></script><script>
+  
+
+</script>
     <body>
 
     <script type="text/javascript">
@@ -117,8 +121,19 @@
 
             if (cursors.up.isDown)
             {
-                //  Move to the left
-                player1.body.velocity.y = -500;
+                var socket = io('http://localhost:8080');
+                socket.emit('player1_position_update', { player1_position_update: -500 });
+                
+                socket.on('player1_position_updated', function(data){
+                    for(var player1_position_updated in data) {
+                        player1.body.velocity.y = data.player1_position_updated;
+
+                    }
+                    //player1.body.velocity.y = data.player1_position_updated;
+                    console.log('llega :');
+                    console.log(data.player1_position_updated);
+                });
+                    
 
             }
             else if (cursors.down.isDown)
