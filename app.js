@@ -29,14 +29,14 @@ io.on('connection', function (socket) {
   
     socket.broadcast.emit('player2_position', { move: data.move, position:-200});
     socket.emit('player1_position', { move: data.move, position:-200});
-    console.log(socket);
+    //console.log(socket);
   });
 
   socket.on('player_stopped', function (data) {
   
     socket.broadcast.emit('player2_stopped', { move: data.move, position:0});
     socket.emit('player1_stopped', { move: data.move, position:0});
-    console.log(socket);
+    //console.log(socket);
   });
 });
 

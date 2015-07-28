@@ -136,20 +136,17 @@
                
 
             }
-           
+            else
+            {
+                
+                socket.emit('player_stopped', { move: 'stop' });
+
+            }
 
 
         }
-        document.getElementsByTagName('canvas').onkeyup = function(event) {
-            socket.emit('player_stopped', { move: 'stop' });
-            
-            return false
-
-        }
+        
     };
-
-
-
     socket.on('player1_position', function(data){
         player1.body.velocity.y = data.position;
            
@@ -160,9 +157,11 @@
 
     socket.on('player1_stopped', function(data){
         player1.body.velocity.y = data.position;
+        //console.log('freno el 1');
     });
     socket.on('player2_stopped', function(data){
         player2.body.velocity.y = data.position;
+        //console.log('freno el 2');
     });
     </script>
 
