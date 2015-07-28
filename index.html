@@ -12,12 +12,14 @@
     <body>
 
     <script type="text/javascript">
-
+    var player1;    
+    var player2;    
+    var socket = io('http://localhost:8080');
     window.onload = function() {
 
         var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
         var ball;
-        var player1;
+        
         var platforms;
         
         function preload() {
@@ -99,12 +101,15 @@
         player2.ctx.rect(0, 0, width, height);
         player2.ctx.fillStyle = '#ffffff';
         player2.ctx.fill();
-        drawnObject2 = game.add.sprite(790, game.world.centerY, player2);
-        drawnObject2.anchor.setTo(0.5, 0.5);
+        player2 = game.add.sprite(790, game.world.centerY, player2);
+        player2.anchor.setTo(0.5, 0.5);
 
         ball.body.velocity.x = -150;
         ball.body.velocity.y = 150;
 
+        game.physics.arcade.enable(player2);
+        player2.body.collideWorldBounds = true;
+        player2.body.immovable = true;
 
         }
 
@@ -117,43 +122,48 @@
             game.physics.arcade.collide(ball, player1);
             game.physics.arcade.collide(ball, platforms);
 
-            player1.body.velocity.y = 0;
+            
 
             if (cursors.up.isDown)
-            {
-                var socket = io('http://localhost:8080');
-                socket.emit('player1_position_update', { player1_position_update: -500 });
+            {   
                 
-                socket.on('player1_position_updated', function(data){
-                    for(var player1_position_updated in data) {
-                        player1.body.velocity.y = data.player1_position_updated;
+                socket.emit('player_moved', { move: 'up' });
 
-                    }
-                    //player1.body.velocity.y = data.player1_position_updated;
-                    console.log('llega :');
-                    console.log(data.player1_position_updated);
-                });
-                    
 
             }
             else if (cursors.down.isDown)
             {
-                //  Move to the right
-                player1.body.velocity.y = 500;
+               
 
             }
-            else
-            {
-                //  Stand still
-                player1.animations.stop();
-
-            }
+           
 
 
         }
+        document.getElementsByTagName('canvas').onkeyup = function(event) {
+            socket.emit('player_stopped', { move: 'stop' });
+            
+            return false
 
+        }
     };
 
+
+
+    socket.on('player1_position', function(data){
+        player1.body.velocity.y = data.position;
+           
+    });
+    socket.on('player2_position', function(data){
+        player2.body.velocity.y = data.position;
+    });
+
+    socket.on('player1_stopped', function(data){
+        player1.body.velocity.y = data.position;
+    });
+    socket.on('player2_stopped', function(data){
+        player2.body.velocity.y = data.position;
+    });
     </script>
 
     </body>

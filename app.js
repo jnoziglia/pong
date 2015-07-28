@@ -18,12 +18,26 @@ var server = require('http').Server(app);
 server.listen(8080, function() {
   console.log("Node server running on http://localhost:8000");
 });
-var io = require('socket.io')(server);
+var sio = require('socket.io');
+var io = sio.listen(server);
+var players;
 io.on('connection', function (socket) {
- // 
-  socket.on('player1_position_update', function (data) {
-    console.log(data);
-    console.log('llego server');
-    socket.broadcast.emit('player1_position_updated', { player1_position_updated: data.player1_position_update });
+ //
+ //players++;
+
+  socket.on('player_moved', function (data) {
+  
+    socket.broadcast.emit('player2_position', { move: data.move, position:-200});
+    socket.emit('player1_position', { move: data.move, position:-200});
+    console.log(socket);
+  });
+
+  socket.on('player_stopped', function (data) {
+  
+    socket.broadcast.emit('player2_stopped', { move: data.move, position:0});
+    socket.emit('player1_stopped', { move: data.move, position:0});
+    console.log(socket);
   });
 });
+
+
