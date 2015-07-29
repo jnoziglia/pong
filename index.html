@@ -124,7 +124,7 @@
 
             
 
-            if (cursors.up.isDown)
+            /*if (cursors.up.isDown)
             {   
                 
                 socket.emit('player_moved', { move: 'up' });
@@ -136,31 +136,58 @@
                
 
             }
-            else
+            else if (cursors.up.onUp)
             {
                 
                 socket.emit('player_stopped', { move: 'stop' });
 
+            }*/
+
+            window.addEventListener("keydown", detectKey, false);
+            //window.addEventListener("keypress", detectKey, false);
+            window.addEventListener("keyup", detectStopKey, false);
+             
+            function detectKey(e) {
+                var keyCode = e.which;
+                
+                if (keyCode == 38) {
+                    socket.emit('player_moved', { move: 'up' });
+                    
+              //console.log('hola');
+                }
             }
 
+            function detectStopKey(e) {
+                var keyCode = e.which;
+                
+                if (keyCode == 38) {
+                    socket.emit('player_stopped', { move: 'stop' });
+                    
+                
+                }
+            }
 
         }
         
     };
     socket.on('player1_position', function(data){
         player1.body.velocity.y = data.position;
+        //console.log('Player 1 se movio a:'+data.position);
            
     });
     socket.on('player2_position', function(data){
         player2.body.velocity.y = data.position;
+        //console.log('Player 2 se movio a:'+data.position);
     });
 
     socket.on('player1_stopped', function(data){
         player1.body.velocity.y = data.position;
+        //console.log('Player 1 freno a:'+data.position);
         //console.log('freno el 1');
     });
     socket.on('player2_stopped', function(data){
         player2.body.velocity.y = data.position;
+        //console.log('Player 2 freno a:'+data.position);
         //console.log('freno el 2');
     });
     </script>
