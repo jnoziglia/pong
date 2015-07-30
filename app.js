@@ -26,18 +26,16 @@ io.on('connection', function (socket) {
  //players++;
 
   socket.on('player_moved', function (data) {
-  
-    socket.broadcast.emit('player2_position', { move: data.move, position:-200});
-    socket.emit('player1_position', { move: data.move, position:-200});
-    //console.log(socket);
+    socket.broadcast.emit('player2_position', { position: data.position });
+    console.log(data.position);
   });
 
   socket.on('player_stopped', function (data) {
+    console.log('freno');
+    console.log(data.position);
   
     socket.broadcast.emit('player2_stopped', { move: data.move, position:0});
-    socket.emit('player1_stopped', { move: data.move, position:0});
-    //console.log(socket);
-  });
+    });
 });
 
 

@@ -111,6 +111,33 @@
         player2.body.collideWorldBounds = true;
         player2.body.immovable = true;
 
+        socket.on('player1_position', function(data){
+            player1.position.y = data.position+50;
+            console.log('Player 1 se movio a:'+data.position);           
+        });
+        socket.on('player2_position', function(data){
+            player2.position.y = data.position+50;
+            console.log('Player 2 se movio a:'+data.position);
+        });
+
+        socket.on('player1_stopped', function(data){
+            player1.body.position.y = data.position;
+            //console.log('Player 1 freno a:'+data.position);
+            //console.log('freno el 1');
+        });
+        socket.on('player2_stopped', function(data){
+            player2.body.position.y = data.position;
+            //console.log('Player 2 freno a:'+data.position);
+            //console.log('freno el 2');
+        });
+
+        socket.on('ball', function(data){
+            ball.body.position.y = data.position;
+            ball.body.position.x = data.position;
+            //console.log('Player 2 freno a:'+data.position);
+            //console.log('freno el 2');
+        });
+
         }
 
         function update() {
@@ -120,76 +147,31 @@
                 ball.body.velocity.y += player1.body.velocity.y;
             });
             game.physics.arcade.collide(ball, player1);
+            game.physics.arcade.collide(ball, player2);
             game.physics.arcade.collide(ball, platforms);
 
-            
+            player1.body.velocity.y = 0;
 
-            /*if (cursors.up.isDown)
+            if (cursors.up.isDown)
             {   
-                
-                socket.emit('player_moved', { move: 'up' });
-
-
+                player1.body.velocity.y = -500;
             }
             else if (cursors.down.isDown)
             {
-               
+               player1.body.velocity.y = 500;
 
             }
-            else if (cursors.up.onUp)
+            else
             {
-                
-                socket.emit('player_stopped', { move: 'stop' });
-
-            }*/
-
-            window.addEventListener("keydown", detectKey, false);
-            //window.addEventListener("keypress", detectKey, false);
-            window.addEventListener("keyup", detectStopKey, false);
-             
-            function detectKey(e) {
-                var keyCode = e.which;
-                
-                if (keyCode == 38) {
-                    socket.emit('player_moved', { move: 'up' });
-                    
-              //console.log('hola');
-                }
+                player1.animations.stop();
             }
 
-            function detectStopKey(e) {
-                var keyCode = e.which;
-                
-                if (keyCode == 38) {
-                    socket.emit('player_stopped', { move: 'stop' });
-                    
-                
-                }
-            }
+            socket.emit('player_moved', { position: player1.body.position.y });
 
         }
         
     };
-    socket.on('player1_position', function(data){
-        player1.body.velocity.y = data.position;
-        //console.log('Player 1 se movio a:'+data.position);
-           
-    });
-    socket.on('player2_position', function(data){
-        player2.body.velocity.y = data.position;
-        //console.log('Player 2 se movio a:'+data.position);
-    });
-
-    socket.on('player1_stopped', function(data){
-        player1.body.velocity.y = data.position;
-        //console.log('Player 1 freno a:'+data.position);
-        //console.log('freno el 1');
-    });
-    socket.on('player2_stopped', function(data){
-        player2.body.velocity.y = data.position;
-        //console.log('Player 2 freno a:'+data.position);
-        //console.log('freno el 2');
-    });
+    
     </script>
 
     </body>
