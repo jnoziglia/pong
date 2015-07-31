@@ -3,6 +3,8 @@ var express = require("express"),
 
 var router = express.Router();
 
+var contador = 0;
+
 router.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
@@ -23,8 +25,16 @@ var io = sio.listen(server);
 var players;
 io.on('connection', function (socket) {
  //
- //players++;
-  socket.broadcast.emit('empieza_bola');
+  contador++;
+  if (contador == 1) {
+    socket.emit('jugador', { pos: 1 });
+  }
+  console.log(contador);
+  if (contador == 2) {
+    socket.emit('jugador', { pos: 2 });
+    socket.emit('empieza_bola');
+  }
+    
 
   socket.on('player_moved', function (data) {
     socket.broadcast.emit('player2_position', { position: data.position });
@@ -39,12 +49,16 @@ io.on('connection', function (socket) {
     });
 
   socket.on('ball_position_update', function (data) {
-    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
-    
+    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX, speedX: data.speedX, speedY: data.speedY });
   });
+
   socket.on('muevo_bola', function (data) {
     socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
     
+  });
+
+  socket.on('disconnect', function() {
+    contador--;
   });
 });
 
