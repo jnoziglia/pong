@@ -17,7 +17,7 @@ app.use('/', router);
 
 var server = require('http').Server(app);
 
-server.listen(8080, function() {
+server.listen(80, function() {
   console.log("Node server running on http://localhost:8000");
 });
 var sio = require('socket.io');
