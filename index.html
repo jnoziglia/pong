@@ -14,7 +14,7 @@
     <script type="text/javascript">
     var player1;    
     var player2;    
-    var socket = io('http://localhost:80');
+    var socket = io('http://localhost:8080');
     var jugadorPos;
     socket.on('jugador', function(data) {
         jugadorPos = data.pos;
