@@ -104,12 +104,15 @@
         player2 = game.add.sprite(790, game.world.centerY, player2);
         player2.anchor.setTo(0.5, 0.5);
 
-        ball.body.velocity.x = -150;
-        ball.body.velocity.y = 150;
+        /*ball.body.velocity.x = -150;
+        ball.body.velocity.y = 150;*/
 
         game.physics.arcade.enable(player2);
         player2.body.collideWorldBounds = true;
         player2.body.immovable = true;
+
+        ball.body.velocity.x = -150;
+                    ball.body.velocity.y = 150;
 
         socket.on('player1_position', function(data){
             player1.position.y = data.position+50;
@@ -131,12 +134,17 @@
             //console.log('freno el 2');
         });
 
-        socket.on('ball', function(data){
-            ball.body.position.y = data.position;
-            ball.body.position.x = data.position;
+        socket.on('ball_position_updated', function(data){
+            ball.position.y = data.positionY;
+            ball.position.x = data.positionX;
             //console.log('Player 2 freno a:'+data.position);
             //console.log('freno el 2');
         });
+        socket.on('empieza_bola', function(data){
+                    
+                   
+                    
+                });
 
         }
 
@@ -165,8 +173,9 @@
             {
                 player1.animations.stop();
             }
-
+            socket.emit('muevo_bola', {positionX: ball.body.position.x, positionY: ball.body.position.y });
             socket.emit('player_moved', { position: player1.body.position.y });
+            socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x });
 
         }
         

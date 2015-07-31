@@ -24,18 +24,28 @@ var players;
 io.on('connection', function (socket) {
  //
  //players++;
+  socket.broadcast.emit('empieza_bola');
 
   socket.on('player_moved', function (data) {
     socket.broadcast.emit('player2_position', { position: data.position });
-    console.log(data.position);
+    //console.log(data.position);
   });
 
   socket.on('player_stopped', function (data) {
-    console.log('freno');
-    console.log(data.position);
+    //console.log('freno');
+    //console.log(data.position);
   
     socket.broadcast.emit('player2_stopped', { move: data.move, position:0});
     });
+
+  socket.on('ball_position_update', function (data) {
+    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
+    
+  });
+  socket.on('muevo_bola', function (data) {
+    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
+    
+  });
 });
 
 
