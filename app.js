@@ -29,7 +29,6 @@ io.on('connection', function (socket) {
   if (contador == 1) {
     socket.emit('jugador', { pos: 1 });
   }
-  console.log(contador);
   if (contador == 2) {
     socket.emit('jugador', { pos: 2 });
     socket.emit('empieza_bola');

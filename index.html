@@ -16,6 +16,8 @@
     var player2;    
     var socket = io('http://52.26.189.215:80');
     var jugadorPos;
+    var contador = 0;
+    var enviar = false;
     socket.on('jugador', function(data) {
         jugadorPos = data.pos;
     //});
@@ -162,6 +164,12 @@
 
         function update() {
 
+            contador++;
+            if(contador > 10) {
+                contador = 0;
+                enviar = true;
+            }
+
             position = player1.body.position.x - ball.body.position.x;
             //  Collide the player and the stars with the platforms
             game.physics.arcade.collide(player1, ball, function(player1, ball) {
@@ -173,7 +181,9 @@
             
             if (jugadorPos == 2) {
                 //console.log(ball.body.velocity.x);
-                socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x, speedX: ball.body.velocity.x, speedY: ball.body.velocity.y });
+                if (enviar) {
+                    socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x, speedX: ball.body.velocity.x, speedY: ball.body.velocity.y });
+                }
             }
 
             player1.body.velocity.y = 0;
@@ -193,6 +203,7 @@
             }
             //socket.emit('muevo_bola', {positionX: ball.body.position.x, positionY: ball.body.position.y });
             socket.emit('player_moved', { position: player1.body.position.y });
+            enviar = 0;
 
         }
         
