@@ -18,7 +18,6 @@
     var jugadorPos;
     socket.on('jugador', function(data) {
         jugadorPos = data.pos;
-        console.log(jugadorPos);
     //});
     //window.onload = function() {
 
@@ -86,12 +85,10 @@
         if (jugadorPos == 1) {
             player1 = game.add.sprite(10, game.world.centerY, player1);
             player1.anchor.setTo(0.5, 0.5);
-            console.log('juagdor1');
         }
         if (jugadorPos == 2) {
             player1 = game.add.sprite(790, game.world.centerY, player1);
             player1.anchor.setTo(0.5, 0.5);
-            console.log('juagdor2');
         }
         
 
@@ -117,13 +114,10 @@
         player2.ctx.fill();
         if (jugadorPos == 2) {
             player2 = game.add.sprite(10, game.world.centerY, player2);
-            player2.anchor.setTo(0.5, 0.5);
-            console.log('juagdor1');
-        }
+            player2.anchor.setTo(0.5, 0.5);        }
         if (jugadorPos == 1) {
             player2 = game.add.sprite(790, game.world.centerY, player2);
             player2.anchor.setTo(0.5, 0.5);
-            console.log('juagdor2');
         }
         
 
@@ -135,12 +129,10 @@
         player2.body.immovable = true;
 
         socket.on('player1_position', function(data){
-            player1.position.y = data.position+50;
-            console.log('Player 1 se movio a:'+data.position);           
+            player1.position.y = data.position+50;      
         });
         socket.on('player2_position', function(data){
             player2.position.y = data.position+50;
-            console.log('Player 2 se movio a:'+data.position);
         });
 
         socket.on('player1_stopped', function(data){
@@ -179,7 +171,6 @@
             game.physics.arcade.collide(ball, player2);
             game.physics.arcade.collide(ball, platforms);
             
-            console.log(Math.abs(position));
             if (jugadorPos == 2) {
                 //console.log(ball.body.velocity.x);
                 socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x, speedX: ball.body.velocity.x, speedY: ball.body.velocity.y });
