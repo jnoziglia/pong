@@ -14,7 +14,7 @@
     <script type="text/javascript">
     var player1;    
     var player2;    
-    var socket = io('http://52.26.189.215:8080');
+    var socket = io('http://localhost:8080', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling']});
     var jugadorPos;
     socket.on('jugador', function(data) {
         jugadorPos = data.pos;

@@ -20,7 +20,7 @@ var server = require('http').Server(app);
 server.listen(8080, function() {
   console.log("Node server running on http://localhost:8000");
 });
-var sio = require('socket.io');
+var sio = require('socket.io', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] });
 var io = sio.listen(server);
 var players;
 io.on('connection', function (socket) {
