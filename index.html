@@ -14,8 +14,16 @@
     <script type="text/javascript">
     var player1;    
     var player2;    
-    var socket = io('http://localhost:8080', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling']});
-    window.onload = function() {
+
+    var socket = io('http://52.26.189.215:8010',  { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling']} );
+    var jugadorPos;
+    var contador = 0;
+    var enviar = false;
+    socket.on('jugador', function(data) {
+        jugadorPos = data.pos;
+    //});
+    //window.onload = function() {
+
 
         var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
         var ball;
@@ -60,7 +68,7 @@
         ball.ctx.rect(0, 0, 10, 10);
         ball.ctx.fillStyle = '#ffffff';
         ball.ctx.fill();
-        ball = game.add.sprite(395, game.world.centerY, ball);
+        ball = game.add.sprite(400, game.world.centerY, ball);
         ball.anchor.setTo(0.5, 0.5);
 
         // Tweening just for fun :)
@@ -78,8 +86,15 @@
         player1.ctx.rect(0, 0, width, height);
         player1.ctx.fillStyle = '#ffffff';
         player1.ctx.fill();
-        player1 = game.add.sprite(10, game.world.centerY, player1);
-        player1.anchor.setTo(0.5, 0.5);
+        if (jugadorPos == 1) {
+            player1 = game.add.sprite(10, game.world.centerY, player1);
+            player1.anchor.setTo(0.5, 0.5);
+        }
+        if (jugadorPos == 2) {
+            player1 = game.add.sprite(790, game.world.centerY, player1);
+            player1.anchor.setTo(0.5, 0.5);
+        }
+        
 
         game.physics.arcade.enable(player1);
         game.physics.arcade.enable(ball);
@@ -101,8 +116,14 @@
         player2.ctx.rect(0, 0, width, height);
         player2.ctx.fillStyle = '#ffffff';
         player2.ctx.fill();
-        player2 = game.add.sprite(790, game.world.centerY, player2);
-        player2.anchor.setTo(0.5, 0.5);
+        if (jugadorPos == 2) {
+            player2 = game.add.sprite(10, game.world.centerY, player2);
+            player2.anchor.setTo(0.5, 0.5);        }
+        if (jugadorPos == 1) {
+            player2 = game.add.sprite(790, game.world.centerY, player2);
+            player2.anchor.setTo(0.5, 0.5);
+        }
+        
 
         /*ball.body.velocity.x = -150;
         ball.body.velocity.y = 150;*/
@@ -111,16 +132,11 @@
         player2.body.collideWorldBounds = true;
         player2.body.immovable = true;
 
-        ball.body.velocity.x = -150;
-                    ball.body.velocity.y = 150;
-
         socket.on('player1_position', function(data){
-            player1.position.y = data.position+50;
-            console.log('Player 1 se movio a:'+data.position);           
+            player1.position.y = data.position+50;      
         });
         socket.on('player2_position', function(data){
             player2.position.y = data.position+50;
-            console.log('Player 2 se movio a:'+data.position);
         });
 
         socket.on('player1_stopped', function(data){
@@ -140,23 +156,37 @@
             //console.log('Player 2 freno a:'+data.position);
             //console.log('freno el 2');
         });
-        socket.on('empieza_bola', function(data){
-                    
-                   
-                    
-                });
+
+        if (jugadorPos == 2) {
+            ball.body.velocity.x = 100;
+            ball.body.velocity.y = 100;    
+        }
 
         }
 
         function update() {
 
+            contador++;
+            if(contador > 10) {
+                contador = 0;
+                enviar = true;
+            }
+
+            position = player1.body.position.x - ball.body.position.x;
             //  Collide the player and the stars with the platforms
             game.physics.arcade.collide(player1, ball, function(player1, ball) {
                 ball.body.velocity.y += player1.body.velocity.y;
             });
-            game.physics.arcade.collide(ball, player1);
+            //game.physics.arcade.collide(ball, player1);
             game.physics.arcade.collide(ball, player2);
             game.physics.arcade.collide(ball, platforms);
+            
+            if (jugadorPos == 2) {
+                //console.log(ball.body.velocity.x);
+                if (enviar) {
+                    socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x, speedX: ball.body.velocity.x, speedY: ball.body.velocity.y });
+                }
+            }
 
             player1.body.velocity.y = 0;
 
@@ -173,13 +203,13 @@
             {
                 player1.animations.stop();
             }
-            socket.emit('muevo_bola', {positionX: ball.body.position.x, positionY: ball.body.position.y });
+            //socket.emit('muevo_bola', {positionX: ball.body.position.x, positionY: ball.body.position.y });
             socket.emit('player_moved', { position: player1.body.position.y });
-            socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x });
+            enviar = 0;
 
         }
         
-    };
+    });
     
     </script>
 

@@ -3,6 +3,8 @@ var express = require("express"),
 
 var router = express.Router();
 
+var contador = 0;
+
 router.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
@@ -15,7 +17,7 @@ app.use('/', router);
 
 var server = require('http').Server(app);
 
-server.listen(8080, function() {
+server.listen(8010, function() {
   console.log("Node server running on http://localhost:8000");
 });
 var sio = require('socket.io',  { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] });
@@ -23,8 +25,15 @@ var io = sio.listen(server);
 var players;
 io.on('connection', function (socket) {
  //
- //players++;
-  socket.broadcast.emit('empieza_bola');
+  contador++;
+  if (contador == 1) {
+    socket.emit('jugador', { pos: 1 });
+  }
+  if (contador == 2) {
+    socket.emit('jugador', { pos: 2 });
+    socket.emit('empieza_bola');
+  }
+    
 
   socket.on('player_moved', function (data) {
     socket.broadcast.emit('player2_position', { position: data.position });
@@ -39,12 +48,16 @@ io.on('connection', function (socket) {
     });
 
   socket.on('ball_position_update', function (data) {
-    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
-    
+    socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX, speedX: data.speedX, speedY: data.speedY });
   });
+
   socket.on('muevo_bola', function (data) {
     socket.broadcast.emit('ball_position_updated', { positionY: data.positionY, positionX: data.positionX });
     
+  });
+
+  socket.on('disconnect', function() {
+    contador--;
   });
 });
 
