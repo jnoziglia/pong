@@ -15,16 +15,22 @@
     var player1;    
     var player2;    
 
-    var socket = io('http://includeweb.com.ar:8010',  { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling']} );
+    var socket = io();
     var jugadorPos;
     var contador = 0;
-    var enviar = false;
-    socket.on('jugador', function(data) {
-        jugadorPos = data.pos;
-    //});
-    //window.onload = function() {
 
+    let keyA;
+    let keyS;
+    let keyD;
+    let keyW;
 
+    let score = {
+        'player1': 0,
+        'player2': 0
+    };
+    let scoreText1;
+    let scoreText2;
+    window.onload = function() {
         var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
         var ball;
         
@@ -35,6 +41,10 @@
         }
 
         function create() {
+        keyA = this.input.keyboard.addKey(Phaser.Keyboard.A);
+        keyS = this.input.keyboard.addKey(Phaser.Keyboard.S);
+        keyD = this.input.keyboard.addKey(Phaser.Keyboard.D);
+        keyW = this.input.keyboard.addKey(Phaser.Keyboard.W);
 
         game.physics.startSystem(Phaser.Physics.ARCADE);
         //seteo background del juego
@@ -57,46 +67,38 @@
         var top = platforms.create(0,  game.world.height-600, groundSprite);
 
         ground.body.immovable = true;
-        top.body.immovable = true;
-
-        // todo sobre la bola
-        // Create BitmapData
-        ball = game.add.bitmapData(10,10);
-
-        // Dibujo la bola
-        ball.ctx.beginPath();
-        ball.ctx.rect(0, 0, 10, 10);
-        ball.ctx.fillStyle = '#ffffff';
-        ball.ctx.fill();
-        ball = game.add.sprite(400, game.world.centerY, ball);
-        ball.anchor.setTo(0.5, 0.5);
+        top.body.immovable = true;       
+        
+        createBall();
 
         // Tweening just for fun :)
         //game.add.tween(sprite).to( {  y: 100}, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
         cursors = game.input.keyboard.createCursorKeys();
 
-
         //todo player uno
         var width = 10 // example;
         var height = 100 // example;
+
         player1 = game.add.bitmapData(width, height);
-         
         player1.ctx.beginPath();
         player1.ctx.rect(0, 0, width, height);
         player1.ctx.fillStyle = '#ffffff';
         player1.ctx.fill();
-        if (jugadorPos == 1) {
-            player1 = game.add.sprite(10, game.world.centerY, player1);
-            player1.anchor.setTo(0.5, 0.5);
-        }
-        if (jugadorPos == 2) {
-            player1 = game.add.sprite(790, game.world.centerY, player1);
-            player1.anchor.setTo(0.5, 0.5);
-        }
-        
+        player1 = game.add.sprite(10, game.world.centerY, player1);
+        player1.anchor.setTo(0.5, 0.5);
 
+        //todo player dos
+        player2 = game.add.bitmapData(width, height);
+        player2.ctx.beginPath();
+        player2.ctx.rect(0, 0, width, height);
+        player2.ctx.fillStyle = '#ffffff';
+        player2.ctx.fill();
+        player2 = game.add.sprite(790, game.world.centerY, player2);
+        player2.anchor.setTo(0.5, 0.5);
+        
         game.physics.arcade.enable(player1);
+        game.physics.arcade.enable(player2);
         game.physics.arcade.enable(ball);
 
     //  Player physics properties. Give the little guy a slight bounce.
@@ -107,109 +109,95 @@
 
         ball.body.bounce.y = 1;
         ball.body.bounce.x = 1;
-        //ball.body.collideWorldBounds = true;
-
-        //todo player dos
-        player2 = game.add.bitmapData(width, height);
-         
-        player2.ctx.beginPath();
-        player2.ctx.rect(0, 0, width, height);
-        player2.ctx.fillStyle = '#ffffff';
-        player2.ctx.fill();
-        if (jugadorPos == 2) {
-            player2 = game.add.sprite(10, game.world.centerY, player2);
-            player2.anchor.setTo(0.5, 0.5);        }
-        if (jugadorPos == 1) {
-            player2 = game.add.sprite(790, game.world.centerY, player2);
-            player2.anchor.setTo(0.5, 0.5);
-        }
         
-
-        /*ball.body.velocity.x = -150;
-        ball.body.velocity.y = 150;*/
-
-        game.physics.arcade.enable(player2);
         player2.body.collideWorldBounds = true;
         player2.body.immovable = true;
 
-        socket.on('player1_position', function(data){
-            player1.position.y = data.position+50;      
-        });
-        socket.on('player2_position', function(data){
-            player2.position.y = data.position+50;
-        });
 
-        socket.on('player1_stopped', function(data){
-            player1.body.position.y = data.position;
-            //console.log('Player 1 freno a:'+data.position);
-            //console.log('freno el 1');
-        });
-        socket.on('player2_stopped', function(data){
-            player2.body.position.y = data.position;
-            //console.log('Player 2 freno a:'+data.position);
-            //console.log('freno el 2');
-        });
+        ball.body.velocity.x = 300;
+        ball.body.velocity.y = 200;
 
-        socket.on('ball_position_updated', function(data){
-            ball.position.y = data.positionY;
-            ball.position.x = data.positionX;
-            //console.log('Player 2 freno a:'+data.position);
-            //console.log('freno el 2');
-        });
-
-        if (jugadorPos == 2) {
-            ball.body.velocity.x = 100;
-            ball.body.velocity.y = 100;    
-        }
+        scoreText1 = game.add.text(200, 16, score.player1, { fontSize: '32px', fill: '#fff' });
+        scoreText2 = game.add.text(600, 16, score.player2, { fontSize: '32px', fill: '#fff' });
 
         }
 
         function update() {
 
-            contador++;
-            if(contador > 10) {
-                contador = 0;
-                enviar = true;
-            }
-
-            position = player1.body.position.x - ball.body.position.x;
             //  Collide the player and the stars with the platforms
             game.physics.arcade.collide(player1, ball, function(player1, ball) {
-                ball.body.velocity.y += player1.body.velocity.y;
+                ball.body.velocity.y += player1.body.velocity.y/5;
             });
             //game.physics.arcade.collide(ball, player1);
-            game.physics.arcade.collide(ball, player2);
+            game.physics.arcade.collide(player2, ball, function(player2, ball) {
+                ball.body.velocity.y += player2.body.velocity.y/5;
+            });
             game.physics.arcade.collide(ball, platforms);
-            
-            if (jugadorPos == 2) {
-                //console.log(ball.body.velocity.x);
-                if (enviar) {
-                    socket.emit('ball_position_update', { positionY: ball.body.position.y, positionX: ball.body.position.x, speedX: ball.body.velocity.x, speedY: ball.body.velocity.y });
-                }
-            }
 
             player1.body.velocity.y = 0;
+            player2.body.velocity.y = 0;
 
             if (cursors.up.isDown)
             {   
+                player2.body.velocity.y = -500;
+            }
+            if (cursors.down.isDown)
+            {
+               player2.body.velocity.y = 500;
+            }
+            if (!cursors.up.isDown && !cursors.down.isDown)
+            {
+                player2.animations.stop();
+            }
+            if (keyW.isDown)
+            {
                 player1.body.velocity.y = -500;
             }
-            else if (cursors.down.isDown)
+            if (keyS.isDown)
             {
-               player1.body.velocity.y = 500;
+                player1.body.velocity.y = 500;
 
             }
-            else
+            if (!keyW.isDown && !keyS.isDown)
             {
                 player1.animations.stop();
             }
-            //socket.emit('muevo_bola', {positionX: ball.body.position.x, positionY: ball.body.position.y });
-            socket.emit('player_moved', { position: player1.body.position.y });
-            enviar = 0;
+
+            if (ball.body.position.x >= 800) {
+                score.player1++;
+                scoreText1.setText(score.player1);
+                resetBall();
+            }
+
+            if (ball.body.position.x <= 0) {
+                score.player2++;
+                scoreText2.setText(score.player2);
+                resetBall();
+            }
 
         }
+
+        function createBall() {
+            // Create BitmapData
+            ball = game.add.bitmapData(10,10);
+
+            // Dibujo la bola
+            ball.ctx.beginPath();
+            ball.ctx.rect(0, 0, 10, 10);
+            ball.ctx.fillStyle = '#ffffff';
+            ball.ctx.fill();
+            ball = game.add.sprite(400, game.world.centerY, ball);
+            ball.anchor.setTo(0.5, 0.5);
+        }
+
+        function resetBall() {
+            ball.body.position.x = game.world.centerX;
+            ball.body.position.y = game.world.centerY;
+            ball.body.velocity.x = 300;
+            ball.body.velocity.y = 200; 
+        }
         
-    });
+    };
     
     </script>
 

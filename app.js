@@ -2,6 +2,10 @@ var express = require("express"),
     app = express();
 
 var router = express.Router();
+const http = require('http');
+const server = http.createServer(app);
+var { Server } = require('socket.io');
+var io = new Server(server);
 
 var contador = 0;
 
@@ -15,17 +19,15 @@ router.get('/phaser.js', function(req, res) {
 
 app.use('/', router);
 
-var server = require('http').Server(app);
-
 server.listen(8010, function() {
   console.log("Node server running on http://localhost:8000");
 });
-var sio = require('socket.io',  { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] });
-var io = sio.listen(server);
+
 var players;
 io.on('connection', function (socket) {
  //
   contador++;
+  console.log(contador);
   if (contador == 1) {
     socket.emit('jugador', { pos: 1 });
   }
